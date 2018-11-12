@@ -19,6 +19,7 @@ main(int argc, char *argv[])
 
     if (argc != 4) {
         printf(2, "usage: %s filename offset nb\n", argv[0]);
+        exit();
     }
 
     if ((fd = open(argv[1], 0)) < 0) {
