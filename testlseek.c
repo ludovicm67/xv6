@@ -34,7 +34,10 @@ main(int argc, char *argv[])
         whence = SEEK_END;
     }
 
-    lseek(fd, offset, whence);
+    if (lseek(fd, offset, whence) < 0) {
+        printf(1, "%s: lseek error\n", argv[0], argv[1]);
+        exit();
+    }
 
     if (nbToRead > nb) {
         nbToRead = nb;
@@ -61,8 +64,10 @@ main(int argc, char *argv[])
     
     printf(1, "\n");
 
-
-    close(fd);
+    if ((close(fd)) == -1) {
+        printf(1, "%s: close error\n", argv[0]);
+        exit();
+    }
 
     exit();
 }

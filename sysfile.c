@@ -448,69 +448,14 @@ sys_pipe(void)
 int
 sys_lseek(void)
 {
-    int fd;
     int offset;
     int whence;
     struct file * f;
 
-    // fetch file descriptor
-    if (argint(0, (int *)&fd) < 0) {
-        return -1;
+    if (argfd(0, 0, &f) < 0 || argint(1, &offset) < 0 || argint(2, &whence) < 0) {
+      return -1;
     }
 
-    // fetch offset
-    if (argint(1, (int *)&offset) < 0) {
-        return -1;
-    }
-
-    // fetch whence
-    if (argint(2, (int *)&whence) < 0) {
-        return -1;
-    }
-
-    // get file struct
-    if(fd < 0 || fd >= NOFILE || (f=myproc()->ofile[fd]) == 0) {
-        return -1;
-    }
-
-    // check file type
-    if (f->type != FD_INODE) {
-        return -1;
-    }
-
-    // get stat struct of this file
-    struct stat s;
-    if (filestat(f, &s) < 0) {
-        return -1;
-    }
-
-    // change offset depending of the position
-    switch (whence) {
-        case SEEK_CUR:
-            f->off += offset;
-            break;
-        case SEEK_SET:
-            f->off = offset;
-            break;
-        case SEEK_END:
-            f->off = s.size + offset;
-            break;
-        default:
-            // do nothing
-            break;
-    }
-
-    // if offset is negative, go to the end
-    if (f->off < 0) {
-        f->off = 0;
-    }
-
-    // if offset is too big, reduce it to the size of the file
-    if (f->off > s.size) {
-        f->off = s.size;
-    }
-
-    // return the final offset
-    return f->off;
+    return filelseek(f, offset, whence);
 }
 
