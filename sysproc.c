@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "ncalls.h"
 
 int
 sys_fork(void)
@@ -88,4 +89,34 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+int
+sys_ncalls1(void)
+{
+  int nb_calls;
+  acquire(&nc1.lock);
+  nb_calls = nc1.nb_calls;
+  release(&nc1.lock);
+  return nb_calls;
+}
+
+int
+sys_ncalls2(void)
+{
+  struct ncalls * nc;
+  struct proc *curproc = myproc();
+
+  // error if pointer is out of allowed address range
+  if(argptr(0, (void*)&nc, sizeof(*nc)) < 0)
+    return -1;
+
+  // fetch total syscall count
+  acquire(&nc1.lock);
+  nc->total = nc1.nb_calls;
+  release(&nc1.lock);
+
+  nc->proc = curproc->nb_syscalls;
+
+  return 0;
 }

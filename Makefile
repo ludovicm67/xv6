@@ -12,6 +12,7 @@ OBJS = \
 	log.o\
 	main.o\
 	mp.o\
+	ncalls.o\
 	picirq.o\
 	pipe.o\
 	proc.o\

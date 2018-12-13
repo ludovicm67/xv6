@@ -29,6 +29,6 @@ SYSCALL(getpid)
 SYSCALL(sbrk)
 SYSCALL(sleep)
 SYSCALL(uptime)
-
 SYSCALL(lseek)
-
+SYSCALL(ncalls1)
+SYSCALL(ncalls2)

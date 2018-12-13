@@ -5,6 +5,8 @@
 #include "mmu.h"
 #include "proc.h"
 #include "x86.h"
+#include "spinlock.h"
+#include "ncalls.h"
 
 static void startothers(void);
 static void mpmain(void)  __attribute__((noreturn));
@@ -17,6 +19,7 @@ extern char end[]; // first address after kernel loaded from ELF file
 int
 main(void)
 {
+  ncallsinit();
   kinit1(end, P2V(4*1024*1024)); // phys page allocator
   kvmalloc();      // kernel page table
   mpinit();        // detect other processors

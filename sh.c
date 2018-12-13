@@ -3,6 +3,7 @@
 #include "types.h"
 #include "user.h"
 #include "fcntl.h"
+#include "ncalls.h"
 
 // Parsed command representation
 #define EXEC  1
@@ -146,6 +147,9 @@ main(void)
 {
   static char buf[100];
   int fd;
+  int nc1;
+  struct ncalls nc;
+
 
   // Ensure that three file descriptors are open.
   while((fd = open("console", O_RDWR)) >= 0){
@@ -162,6 +166,20 @@ main(void)
       buf[strlen(buf)-1] = 0;  // chop \n
       if(chdir(buf+3) < 0)
         printf(2, "cannot cd %s\n", buf+3);
+      continue;
+    }
+    if (buf[0]=='n' && buf[1]=='c' && buf[2]=='1' && buf[3]=='\n') {
+      nc1 = ncalls1();
+      printf(1, "number of syscalls: %d\n", nc1);
+      continue;
+    }
+    if (buf[0]=='n' && buf[1]=='c' && buf[2]=='2' && buf[3]=='\n') {
+      if (ncalls2(&nc) < 0) {
+        printf(2, "ncalls error\n");
+        continue;
+      }
+      printf(1, "number of total syscalls: %d\n", nc.total);
+      printf(1, "number of current proc syscalls: %d\n", nc.proc);
       continue;
     }
     if(fork1() == 0)

@@ -6,6 +6,7 @@
 #include "proc.h"
 #include "x86.h"
 #include "syscall.h"
+#include "ncalls.h"
 
 // User code makes a system call with INT T_SYSCALL.
 // System call number in %eax.
@@ -94,6 +95,8 @@ extern int sys_kill(void);
 extern int sys_link(void);
 extern int sys_mkdir(void);
 extern int sys_mknod(void);
+extern int sys_ncalls1(void);
+extern int sys_ncalls2(void);
 extern int sys_open(void);
 extern int sys_pipe(void);
 extern int sys_read(void);
@@ -128,6 +131,8 @@ static int (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 [SYS_lseek]   sys_lseek,
+[SYS_ncalls1] sys_ncalls1,
+[SYS_ncalls2] sys_ncalls2,
 };
 
 void
@@ -138,6 +143,15 @@ syscall(void)
 
   num = curproc->tf->eax;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
+
+    // increase total number of syscalls since boot (only for existing syscalls)
+    acquire(&nc1.lock);
+    nc1.nb_calls++;
+    release(&nc1.lock);
+
+    // increase number of syscalls made by this process
+    curproc->nb_syscalls++;
+
     curproc->tf->eax = syscalls[num]();
   } else {
     cprintf("%d %s: unknown sys call %d\n",
